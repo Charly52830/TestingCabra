@@ -14,6 +14,7 @@ class NewVisitorTest(LiveServerTestCase):
 
     def tearDown(self):
         self.browser.quit()
+        #pass
         
     def wait_for_row_in_list_table(self, row_text):
         start_time = time.time()
