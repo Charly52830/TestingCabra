@@ -5,7 +5,10 @@ from django.test import TestCase
 from django.http import HttpRequest
 from lists.forms import ItemForm
 from lists.views import home_page
-from lists.forms import ItemForm, EMPTY_ITEM_ERROR
+from lists.forms import (
+    DUPLICATE_ITEM_ERROR, EMPTY_ITEM_ERROR,
+    ExistingListItemForm, ItemForm,
+)
 from unittest import skip
 
 
@@ -68,9 +71,8 @@ class ListViewTest(TestCase):
     def test_displays_item_form(self):
         list_ = List.objects.create()
         response = self.client.get(f'/lists/{list_.id}/')
-        self.assertIsInstance(response.context['form'], ItemForm)
+        self.assertIsInstance(response.context['form'], ExistingListItemForm)
         self.assertContains(response, 'name="text"')
-
 
     def test_POST_redirects_to_list_view(self):
         other_list = List.objects.create()
@@ -102,7 +104,7 @@ class ListViewTest(TestCase):
 
     def test_for_invalid_input_passes_form_to_template(self):
         response = self.post_invalid_input()
-        self.assertIsInstance(response.context['form'], ItemForm)
+        self.assertIsInstance(response.context['form'], ExistingListItemForm)
 
     def test_for_invalid_input_shows_error_on_page(self):
         response = self.post_invalid_input()
@@ -135,15 +137,6 @@ class NewItemTest(TestCase):
         )
         #self.assertRedirects(response, f'/lists/{correct_list.id}/')
         self.assertRedirects(response, '/lists/%d/'%(correct_list.id))
-    
-    """
-    def test_validation_errors_are_sent_back_to_home_page_template(self):
-        response = self.client.post('/lists/new', data={'text': ''})
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'home.html')
-        expected_error = escape("You can't have an empty list item")
-        self.assertContains(response, expected_error)
-    """
 
     def test_invalid_list_items_arent_saved(self):
         self.client.post('/lists/new', data={'text': ''})
@@ -174,6 +167,5 @@ class NewItemTest(TestCase):
         response = self.client.post('/lists/new', data={'text': ''})
         self.assertIsInstance(response.context['form'], ItemForm)
     
-    @skip
     def test_duplicate_item_validation_errors_end_up_on_lists_page(self):
-        pass
+        expected_error = escape(DUPLICATE_ITEM_ERROR)
