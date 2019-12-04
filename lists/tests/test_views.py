@@ -6,6 +6,7 @@ from django.http import HttpRequest
 from lists.forms import ItemForm
 from lists.views import home_page
 from lists.forms import ItemForm, EMPTY_ITEM_ERROR
+from unittest import skip
 
 
 class HomePageTest(TestCase):
@@ -173,3 +174,6 @@ class NewItemTest(TestCase):
         response = self.client.post('/lists/new', data={'text': ''})
         self.assertIsInstance(response.context['form'], ItemForm)
     
+    @skip
+    def test_duplicate_item_validation_errors_end_up_on_lists_page(self):
+        pass
